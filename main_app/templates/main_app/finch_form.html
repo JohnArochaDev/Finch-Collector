@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    {% if object %}
+        <h3>Edit {{ object.name }}</h3>
+    {% else %}
+        <h3>Add a Finch</h3>
+    {% endif %}
+
+    <form action="" method="POST">
+        <!-- django requires this line for security reasons -->
+        <!-- this is colloquially known as a 'c-surf' token -->
+        <!-- it protects agains a common attack known as  -->
+        <!-- cross-site scripting -->
+        {% csrf_token %}
+        <table>
+            <!-- what this line does, is map over the associated model(Cat) -->
+            <!-- creates form inputs based on the attributes and data types -->
+            {{ form.as_table }}
+        </table>
+        <input type="submit" value="Submit!" class="btn">
+    </form>
+
+{% endblock %}

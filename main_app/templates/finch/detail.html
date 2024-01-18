@@ -1,7 +1,117 @@
-
 {% extends 'base.html' %}
 {% block content %}
 
-<h1>{{ finch.name }}</h1>
-
+    <h1>{{ finch.name }}'s Details</h1>
+    <div class="row">
+        <div class="col s6">
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title">{{ finch.name }}</span>
+                    <p>Breed: {{ finch.breed }}</p>
+                    <p>Description: {{ finch.description }}</p>
+                    {% if finch.age > 0 %}
+                        <p>Age: {{ finch.age }}</p>
+                    {% else %}
+                        <p>Age: Bebe</p>
+                    {% endif %}
+                </div>
+                <div class="card-action">
+                    <a href="{% url 'finch_update' finch.id %}">Update</a>
+                    <a href="{% url 'finch_delete' finch.id %}">Delete</a>
+                </div>
+            </div>
+        </div>
+        <div class="col s6">
+            <form action="{% url 'add_feeding' finch.id %}" method="POST">
+                {% csrf_token %}
+                {{ feeding_form.as_p }}
+                <input type="submit" class="btn" value="Add Feeding">
+            </form>
+            <hr>
+            {% if finch.fed_for_today %}
+                <div class="card-panel teal-text center-align">
+                    {{finch.name}} has been fed all meals for today
+                </div>
+            {% else %}
+                <div class="card-panel red-text center-align">
+                    {{finch.name}} might be hungry
+                </div>
+            {% endif %}
+            <hr>
+            <table class="striped">
+                <thead>
+                    <tr><th>Date</th><th>Meal</th></tr>
+                </thead>
+                <tbody>
+                    {% for feeding in finch.feeding_set.all %}
+                        <tr>
+                            <td>{{feeding.date}}</td>
+                            <td>{{feeding.get_meal_display}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s6">
+            <h3>{{ finch.name }}'s Toys</h3>
+            {% if finch.toys.count %}
+                {% for toy in finch.toys.all %}
+                    <div class="card">
+                        <div class="card-content">
+                            <span class="card-title">
+                            A <span style="color: {{ toy.color }}">{{ toy.color }}</span> {{ toy.name }}
+                            </span>
+                            <div class="card-action">
+                                <form action="{% url 'unassoc_toy' finch.id toy.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button class="btn red" type="submit">-</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <h5>No Toys 😿</h5>
+            {% endif %}
+        </div>
+    <!-- Available toys will come after this line -->
+        <div class="col s6">
+            <h3>Available Toys</h3>
+            {% if toys.count %}
+                {% for toy in toys.all %}
+                    <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">
+                        A <span style="color: {{ toy.color }}">{{ toy.color }}</span> {{ toy.name }}
+                        </span>
+                    </div>
+                    <div class="card-action">
+                        <form action="{% url 'assoc_toy' finch.id toy.id %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="btn">Add</button>
+                        </form>
+                    </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <h5>{{finch.name}} Already Has All Toys Available</h5>
+            {% endif %}
+        </div>
+        </div>
+    <script>
+        // identify the element
+        const dateEl = document.getElementById('id_date')
+        // M is materialize's global variable
+        M.Datepicker.init(dateEl, {
+            format: 'yyyy-mm-dd',
+            defaultDate: new Date(),
+            setDefaultDate: true,
+            autoClose: true
+        })
+        // here is where we'll render the dropdown (select)
+        const selectEl = document.getElementById('id_meal')
+        M.FormSelect.init(selectEl)
+    </script>
 {% endblock %}
